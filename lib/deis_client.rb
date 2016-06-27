@@ -34,7 +34,7 @@ module Deis
     format :json
     headers 'Accept' => 'application/json'
 
-    API_PATH = '/v1'
+    API_PATH = '/v2'
 
     def initialize(deis_url)
       @base_uri = deis_url + API_PATH
@@ -83,10 +83,17 @@ module Deis
       rollback_release: [:post, '/apps/:app/releases/rollback/']
     }
 
-    def initialize(deis_url, username, password)
+    def initialize(deis_url, username: "", password: "", token: nil)
       @http = Deis::ApiWrapper.new deis_url
       @headers = {'Content-Type' => 'application/json'}
-      @auth = { username: username, password: password }
+
+      if token.nil?
+        @auth = { username: username, password: password }
+        puts @auth
+      else
+        @token = token
+        @headers['Authorization'] = "token #{@token}"
+      end
     end
 
     def login
@@ -203,6 +210,12 @@ module Deis
       perform :rollback_release, { app: app_id }, release: release
     end
 
+    def get_token()
+      login unless @token
+
+      return @token
+    end
+
     protected
 
     def perform(method_sym, interpolations = {}, body = {}, try_twice = true)
@@ -230,7 +243,11 @@ module Deis
     def handle(response)
       case response.code
       when 200...300
-        response.parsed_response
+        begin
+          response.parsed_response
+        rescue JSON::ParserError => exception
+          response.body
+        end 
       when 401
         raise AuthorizationError.new
       when 404
