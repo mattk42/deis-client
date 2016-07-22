@@ -89,7 +89,6 @@ module Deis
 
       if token.nil?
         @auth = { username: username, password: password }
-        puts @auth
       else
         @token = token
         @headers['Authorization'] = "token #{@token}"
