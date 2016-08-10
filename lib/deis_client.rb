@@ -58,6 +58,7 @@ module Deis
     @@methods = {
       # method => HTTP-verb, path
       login: [:post, '/auth/login/'],
+      is_admin: [:get, '/auth/whoami'],
       change_password: [:post, '/auth/passwd/'],
       apps: [:get, '/apps'],
       create_app: [:post, '/apps/'],
@@ -104,6 +105,13 @@ module Deis
       @token = response['token']
       @headers['Authorization'] = "token #{@token}"
       response
+    end
+
+    def is_admin
+      verb, path = @@methods[:is_admin]
+      response = @http.public_send(verb, path, body: @auth)
+
+      return response['is_superuser']
     end
 
     def change_password(old, new, opts = {})
