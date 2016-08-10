@@ -58,7 +58,7 @@ module Deis
     @@methods = {
       # method => HTTP-verb, path
       login: [:post, '/auth/login/'],
-      is_admin: [:get, '/auth/whoami'],
+      is_admin: [:get, '/auth/whoami/'],
       change_password: [:post, '/auth/passwd/'],
       apps: [:get, '/apps'],
       create_app: [:post, '/apps/'],
